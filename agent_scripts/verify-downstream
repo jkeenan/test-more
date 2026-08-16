@@ -591,6 +591,12 @@ installing a list of downstream distributions against the candidate tarball and
 finding out what stops working. This tool does the mechanical half of that job.
 Deciding what a failure I<means>, and what to do about it, is the owner's call.
 
+The list is not the test. Installing those distributions pulls in their
+dependencies and runs each one's test suite, so a run of ~120 listed
+distributions exercises several hundred, covering a large part of the CPAN
+toolchain. That dependency tree is the point of the list, and its results are
+part of the result.
+
 It replaces the old C<xt/downstream.t>, which did the same installs but
 reported them as TAP, kept no logs, and deleted its evidence whenever the run
 succeeded.
@@ -687,6 +693,19 @@ perl it was produced on.
 C<build>, then C<setup --perl ...>. Setup may need to install a perl first,
 which takes a while.
 
+B<Never work around a failing setup step by disabling tests.> Adding C<-n> to
+an install makes that distribution and everything it pulls in install without
+running a single test, which is the coverage the run exists to get. The
+C<prereqs2> step is the only place C<-n> belongs, and it is already there.
+
+When a setup step fails, find out why and report it. C<Test2::Harness> has
+failed the C<prereqs> step by failing its own F<test.pl> with "Could not find
+yath in Config paths", which is a script-path problem inside a fresh perlbrew
+library rather than a fault in the candidate. Setup has no resume, so finishing
+the remaining steps by hand against the created library is reasonable -- run
+them as C<setup> would, without C<-n>, and say in the report which steps were
+run by hand and whether any distribution ended up installed untested.
+
 =item 3. Run the list.
 
 C<run>. It is slow. Nothing needs watching; the state file and logs are on
@@ -700,12 +719,38 @@ Testers for that distribution -- see C<~/projects/Agents/CPAN_TESTERS.md>. A
 distribution already failing on CPAN Testers against the released Test-Simple
 is corroboration, not proof; the baseline run is the stronger signal.
 
-=item 5. Report to the owner.
+=item 5. Account for the dependencies, not just the list.
 
-Give the perl, the tarball, and each failure with its classification, the
-evidence behind it, and what you believe the cause is. The owner decides what
-to fix, what to accept, and what goes on the known-broken list. Do not add a
-known-broken entry yourself.
+A per-distribution status hides everything underneath it. A dependency whose
+tests fail takes its parent down with it, so the failure is in the log, filed
+under a listed distribution that may be classified C<known-broken> or
+C<serial-only> and read as "nothing to see". Before reporting:
+
+    # how many distributions actually installed
+    grep -ho '^Successfully installed [A-Za-z0-9:_.-]*' logs/*.log | sort -u | wc -l
+
+    # dependency failures, and which listed distribution they surfaced under
+    grep -h '! Installing' logs/*-parallel.log logs/*-serial.log
+
+Compare the failures against a run of the previous release on the same perl. A
+dependency failure present in both runs is not the candidate's doing; one that
+appears only against the candidate is a finding, whatever the listed
+distribution's status says.
+
+The installed count tells you the scale a run covered. It is not an expected
+value and two runs do not have to agree on it: prerequisites are added and
+dropped upstream, new versions arrive between runs, and a dependency already
+satisfied is not reinstalled. Treat a difference in the installed set as
+something to explain, not as a result -- name the distributions that differ and
+why, and go on judging the run by its failures.
+
+=item 6. Report to the owner.
+
+Give the perl, the tarball, how many distributions installed in total, and each
+failure with its classification, the evidence behind it, and what you believe
+the cause is. Include dependency failures and any distribution that installed
+without running its tests. The owner decides what to fix, what to accept, and
+what goes on the known-broken list. Do not add a known-broken entry yourself.
 
 =back
 
