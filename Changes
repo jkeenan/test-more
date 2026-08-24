@@ -6,6 +6,8 @@
 
 {{$NEXT}}
 
+    - Allow the subtest tests to pass with Perl core's more accurate line-number reporting (Richard Leach) [github #1090]
+
 1.302223  2026-08-16 01:55:48-07:00 America/Los_Angeles (TRIAL RELEASE)
 
     - Fix a typo in an earlier Changes entry (James E Keenan) [github #1083]
