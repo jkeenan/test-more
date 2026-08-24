@@ -6,6 +6,8 @@
 
 {{$NEXT}}
 
+1.302224  2026-08-24 12:47:02-07:00 America/Los_Angeles
+
     - Allow the subtest tests to pass with Perl core's more accurate line-number reporting (Richard Leach) [github #1090]
 
 1.302223  2026-08-16 01:55:48-07:00 America/Los_Angeles (TRIAL RELEASE)
