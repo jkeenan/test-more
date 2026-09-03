@@ -117,7 +117,7 @@ Test::Pretty         # known-broken since before 2026-08-15: dist.ini [Breaks] d
 Test::Kit
 Test::Group          # known-broken since before 2026-08-15: dist.ini [Breaks] declares <= 0.20
 Test::Flatten        # known-broken since before 2026-08-15: dist.ini [Breaks] declares <= 0.11
-Test2::Harness       # known-broken since before 2026-08-15: dist.ini [Breaks] declares <= 0.000013
+Test2::Harness
 Lexical::Types       # known-broken since before 2026-08-15: reason not recorded
 Test::Class::Moose
 Test::Mocha          # known-broken since before 2026-08-15: reason not recorded
